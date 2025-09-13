@@ -1,0 +1,60 @@
+import { Injectable } from '@nestjs/common';
+import { Encryptor } from '../../domain/entities/encryptor';
+import { EncryptionTypeEnum } from 'src/encryption/domain/enums/enums';
+import { publicEncrypt, privateDecrypt } from 'crypto';
+
+@Injectable()
+export class RsaEncryptor implements Encryptor {
+  private readonly publicKey = `
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1d6XzpEcDFssoKXCzQf3
+mygxCvxmoalEoCPiD7yGUOh14mJDSTs/2D5Kqyn/IPCUnXXBJWiocQph3+DfhY8s
+48rY1rMUijpkmoMbBtD9bTsp1xs9UabmG3N2yQFMSNp7xplRUNTHvH4DoMBUPJdv
+GLAZ9pyQiUWocOdVgT+AtQoaOV5zjedekXT3DeMCd6nwwbIvhTdQdoBxBuFRC15N
+Vjwr3FQwLtpuV72iaAl0lQA4WO6myV2l76M8UZKJ98TFPMkrJmxjK+sbTE/3aUB/
+q2v5pqp97LusgES8Sb2zQU1ROUNoJGdwB9HViqRt6geCfAXPNZxcRoIUzQY7dlqM
+8wIDAQAB
+-----END PUBLIC KEY-----`;
+
+  private readonly privateKey = `
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDV3pfOkRwMWyyg
+pcLNB/ebKDEK/GahqUSgI+IPvIZQ6HXiYkNJOz/YPkqrKf8g8JSddcElaKhxCmHf
+4N+FjyzjytjWsxSKOmSagxsG0P1tOynXGz1RpuYbc3bJAUxI2nvGmVFQ1Me8fgOg
+wFQ8l28YsBn2nJCJRahw51WBP4C1Cho5XnON516RdPcN4wJ3qfDBsi+FN1B2gHEG
+4VELXk1WPCvcVDAu2m5XvaJoCXSVADhY7qbJXaXvozxRkon3xMU8ySsmbGMr6xtM
+T/dpQH+ra/mmqn3su6yARLxJvbNBTVE5Q2gkZ3AH0dWKpG3qB4J8Bc81nFxGghTN
+Bjt2WozzAgMBAAECggEAIPfHsfWHe9YgKoFy5nU4c4f+C2H+FiSIKiFt6xwWHmm/
+Jk8cbTD/df+gNgNqyzKazi0FQZWBBa/ih4bcHfQEqPavd2UyoN5AfNsB8wqLTmfE
+2t5dlPUj2o5xfKnBDyfy1ZnzwYCTa5iHSaPsOEzluMoIro3S7/43aXQXp61Y0087
+lWPYeLDYRD+F85P713qJMi20FJ4EOk4Z3K6xcFdCLvtLGqOj3Wh05dSlCdC+r43Z
+TIwWS9jyAL7xqCbqfVV+dfScMMWRC9YgDA3rM3nB/vXds149ZaHKejrlUa6XHKfe
+9fxqK7iCIiIQfvzIuE9Ld4ejhSDJURcoIky7WWkw7QKBgQD49gwi0kfjxVlSbg9q
+H1wx8MKeuUfJFM6l5HQd/nF+RrayGCRQR4Z8YnTe73mPQIl0hb5t4Q46XPzs9I3d
+fJIrX5TPBwhjv/m3kfCt74VMTzPfSo1NwcvvHC5r/3pPK78mjsETyKU5pwcA9E7B
+fTMDgMDmsbPtQcPpPrM9KM+RBwKBgQDb6o5wSxQvcheO57fwMBq+YUOJY565AJuN
+nSKocDqAX37viXRrgH0tvb/+KPYOGEepPuMqoUABI48tQ/4u3Px0P2vtZr4GDPNb
+PAbK1xk2tlhlIgxeQJKCnRsghY/PSujhwMlNuoBYFviatXIGJxFk8ud6OklmSru7
+VnPK5YUltQKBgAjPNAi7Zh3SKuH20QbRS0LdIRXauoaL/O/z0IQLL9rnB6nvnsFU
+dpbKKRaGZMfD4dlErkNXFljMV4rO8IIo2Uc9n5dfyVU2QtDTEjAlbJMRrmU1TyC0
+PdIdLitWI+7PPnlPzdc0X1xV47KN8od4NajnEmxXV2WK0TLcrBz657VbAoGAK18F
++nWEJJtOtBtU9mS2UYejJyxjeD77bqFn3WpMz1aGFT25nR35EhVTERAI/tyg/Wru
+qFCm69KUgSvgrGNe0ppTcb2KimzxbbPX7xce3OB3bHKbl9cKTgIoAHD23L38UdGQ
+oei/OSBGpVRViYsY7hzNtBhcs3TXs2moaoJ7kOUCgYEA9c08F+zYUf3gvUvvduDn
+Epd9sk2O0l1tUmLucrvafsnTy3Zwz9Wu2Wf3IPYZE9suHRAvl3YRmiuDz/yHnJ4Q
+3vY0kk7hYW+DlnuuaouZE45LPa/ff0mf6IV6FHbGgGQoa0NEtYcip64fRmZRjiNo
+QxfvCmxnY5SKkxwdiFpTYJk=
+-----END PRIVATE KEY-----`;
+
+  encrypt(value: string): string {
+    const buffer = Buffer.from(value, 'utf8');
+    const encrypted = publicEncrypt(this.publicKey, buffer);
+    return encrypted.toString('base64');
+  }
+  decrypt(value: string): string {
+    const buffer = Buffer.from(value, 'base64');
+    const decrypted = privateDecrypt(this.privateKey, buffer);
+    return decrypted.toString('utf8');
+  }
+  encryptorType = EncryptionTypeEnum.RSA;
+}
