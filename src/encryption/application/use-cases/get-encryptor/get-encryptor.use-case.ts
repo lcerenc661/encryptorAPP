@@ -18,6 +18,6 @@ export class GetEncryptorUseCase {
     if (!encryptorCreator){
     throw new Error(`Encryptor creator not created for the encryption type ${encryptionType}`)
     }
-    return encryptorCreator.createEncryptor()
+    return encryptorCreator
   }
 }
