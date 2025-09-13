@@ -1,7 +1,7 @@
 import { EncryptionTypeEnum } from "../enums/enums";
 
-export abstract class Encryptor {
-  abstract encrypt(value: string): string
-  abstract decrypt(value: string): string
-  encryptorType: EncryptionTypeEnum
+export interface Encryptor {
+   encrypt(value: string): string
+   decrypt(value: string): string
+
 }

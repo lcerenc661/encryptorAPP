@@ -2,37 +2,31 @@ import { Module } from '@nestjs/common';
 import { Encryptor } from './domain/entities/encryptor';
 import { RsaEncryptor } from './infrastructure/encryptors/rsa-encryptor';
 import { AesEncryptor } from './infrastructure/encryptors/aes-encryptor';
-import { EncryptorFactoryProvider } from './infrastructure/encryptor.factory.provider';
-import { EncryptDataUseCase } from './application/use-cases/encrypt-data/encrypt-data.use-case';
-import { DecryptDataUseCase } from './application/use-cases/decrypt-data/decrypt-data.use-case';
+import { AesEncryptorCreator } from './infrastructure/encryptor-creators/aes-encryptor.creator';
+import { GetEncryptorUseCase } from './application/use-cases/get-encryptor/get-encryptor.use-case';
 import { EncryptorFactory } from './domain/entities/encryptor.factory';
+import { RsaEncryptorCreator } from './infrastructure/encryptor-creators/rsa-encryptor.creator';
 
 @Module({
   providers:[
-
-    EncryptDataUseCase,
-    DecryptDataUseCase,
-    EncryptorFactoryProvider,
-
-    
+    GetEncryptorUseCase,
+    RsaEncryptorCreator,
     RsaEncryptor,
-    AesEncryptor,
+    AesEncryptorCreator,
+    AesEncryptor, 
+
+
     {
       provide: 'ENCRYPTOR_FACTORY', 
       useFactory:(
-        aesEncryptor: AesEncryptor,
-        rsaEncryptor: RsaEncryptor
-      ): Encryptor[] =>  [aesEncryptor,rsaEncryptor ],
-      inject: [AesEncryptor, RsaEncryptor]
+        aesEncryptorCreator: AesEncryptorCreator,
+        rsaEncryptorCreator: RsaEncryptorCreator
+      ): EncryptorFactory[] =>  [aesEncryptorCreator,rsaEncryptorCreator ],
+      inject: [AesEncryptorCreator, RsaEncryptorCreator]
     },
-    {
-      provide: EncryptorFactory,
-      useExisting: EncryptorFactoryProvider,
-    }
   ],
   exports:[
-    EncryptDataUseCase,
-    DecryptDataUseCase
+    GetEncryptorUseCase
     
   ]
 })

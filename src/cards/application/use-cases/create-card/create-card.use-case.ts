@@ -4,22 +4,23 @@ import {
   CreateCardArgs,
 } from 'src/cards/domain/repositories/card.repository';
 import { Injectable, Logger } from '@nestjs/common';
-import { EncryptDataUseCase } from 'src/encryption/application/use-cases/encrypt-data/encrypt-data.use-case';
+import {  GetEncryptorUseCase } from 'src/encryption/application/use-cases/get-encryptor/get-encryptor.use-case';
 
 @Injectable()
 export class CreateCardUseCase {
   private readonly logger = new Logger(CreateCardUseCase.name);
   constructor(
     private readonly cardRepository: CardRepostitory,
-    private readonly encrypDataUseCase: EncryptDataUseCase,
+    private readonly getEncryptor: GetEncryptorUseCase,
   ) {}
 
   async execute(dto: CreateCardDTO) {
     const { userName, userLastName, cardNumber, encryptionType } = dto;
+    const encryptor = this.getEncryptor.execute(encryptionType)
     const cardData: CreateCardArgs = {
       userName,
       userLastName,
-      cardNumber: this.encrypDataUseCase.execute(encryptionType, cardNumber),
+      cardNumber:encryptor.encrypt(cardNumber),
       encryptionType,
     };
 
